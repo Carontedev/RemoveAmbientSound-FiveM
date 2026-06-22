@@ -35,6 +35,15 @@ CreateThread(function()
     ReleaseAmbientAudioBank()
 end)
 
+local musicStopped = false
+
+AddEventHandler('playerSpawned', function()
+    if not musicStopped then
+        StartAudioScene("DLC_MPHEIST_TRANSITION_TO_APT_FADE_IN_RADIO_SCENE")
+        musicStopped = true
+    end
+end)
+
 CreateThread(function()
     while true do
         SetVehicleDensityMultiplierThisFrame(0.0)
@@ -44,7 +53,17 @@ CreateThread(function()
         SetScenarioPedDensityMultiplierThisFrame(0.0, 0.0)
         DistantCopCarSirens(false)
 
-        local playerVeh = GetVehiclePedIsIn(PlayerPedId(), false)
+        local ped = PlayerPedId()
+        local playerVeh = GetVehiclePedIsIn(ped, false)
+
+        if not IsPedInAnyVehicle(ped, false) then
+            StartAudioScene("DLC_MPHEIST_TRANSITION_TO_APT_FADE_IN_RADIO_SCENE")
+        else
+            SetUserRadioControlEnabled(false)
+            if GetPlayerRadioStationName() ~= nil then
+                SetVehRadioStation(playerVeh, "OFF")
+            end
+        end
         local vehicles = GetGamePool('CVehicle')
         for i = 1, #vehicles do
             local veh = vehicles[i]
